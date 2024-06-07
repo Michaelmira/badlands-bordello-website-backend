@@ -1,6 +1,9 @@
+"""
+This module takes care of starting the API Server, Loading the DB and Adding the endpoints
+"""
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User, Questionnaire
-from api.utils import generate_sitemap, APIException, fetch_questionnaires
+from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
@@ -9,30 +12,10 @@ api = Blueprint('api', __name__)
 # Allow CORS requests to this API
 CORS(api)
 
+@api.route('/questionnaires', methods=['GET'])
 def all_questionnaires():
-    """
-    Endpoint to get all questionnaires using direct psycopg2 connection.
-    """
-    results = fetch_questionnaires()
-    if results is None:
-        return jsonify({"msg": "Error fetching data from database"}), 500
-
-    # Assuming each row in results corresponds to a Questionnaire object with fields matching your model
-    serialized_results = [
-        {
-            "id": row[0],
-            "full_name": row[1],
-            "phone_number": row[2],
-            "burner_email": row[3],
-            "campers": row[4],
-            "space_required": row[5],
-            "leader_question": row[6],
-            "camp_donation": row[7],
-            "early_arrival": row[8],
-            "why_go": row[9]
-        } for row in results
-    ]
-    return jsonify(serialized_results), 200
+    questionnaires = Questionnaire.query.all()
+    return jsonify([questionnaire.serialize() for questionnaire in questionnaires]), 200
 
 @api.route('/questionnaire', methods=['POST'])
 def add_questionnaire():
