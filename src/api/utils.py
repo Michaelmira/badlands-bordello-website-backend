@@ -1,4 +1,6 @@
 from flask import jsonify, url_for
+import psycopg2
+from psycopg2 import sql
 
 class APIException(Exception):
     status_code = 400
@@ -39,3 +41,26 @@ def generate_sitemap(app):
         <p>Start working on your project by following the <a href="https://start.4geeksacademy.com/starters/full-stack" target="_blank">Quick Start</a></p>
         <p>Remember to specify a real endpoint path like: </p>
         <ul style="text-align: left;">"""+links_html+"</ul></div>"
+
+# Database connection details
+connection_string = "dbname='databasebb' user='databasebb_user' password='AYXHgFGdLoYn7y0wOKHHfNfZUeLLsbSd' host='dpg-cpha208l6cac739sln40-a.oregon-postgres.render.com'"
+
+def fetch_questionnaires():
+    try:
+        # Connect to the PostgreSQL database
+        conn = psycopg2.connect(connection_string)
+        cursor = conn.cursor()
+
+        # Execute a query
+        cursor.execute("SELECT * FROM questionnaires;")
+        results = cursor.fetchall()
+
+        # Close the cursor and connection
+        cursor.close()
+        conn.close()
+
+        return results
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
