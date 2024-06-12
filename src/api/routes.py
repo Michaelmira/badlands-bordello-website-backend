@@ -14,6 +14,7 @@ CORS(api)
 
 @api.route('/questionnaires', methods=['GET'])
 def all_questionnaires():
+    @jwt_required()
     questionnaires = Questionnaire.query.all()
     return jsonify([questionnaire.serialize() for questionnaire in questionnaires]), 200
 
@@ -38,7 +39,7 @@ def add_questionnaire():
     return jsonify(response_body), 201
         
 @api.route('/questionnaire/edit/<int:questionnaire_id>', methods=['PUT'])
-# @jwt_required()
+@jwt_required()
 def edit_questionnaire(questionnaire_id):
     full_name = request.json.get("full_name")
     phone_number = request.json.get("phone_number")
@@ -102,9 +103,7 @@ def handle_logins():
 @api.route('/private', methods=['GET'])
 @jwt_required()
 def handle_private_data():
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
-    message = f"of these are all my recent secrets, I use {user.email} and have a {user.id}"
+    message = "Access Granted"
     return jsonify(message), 200
 
 @api.route('/hello', methods=['POST', 'GET'])
