@@ -13,7 +13,7 @@ api = Blueprint('api', __name__)
 CORS(api)
 
 @api.route('/questionnaires', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def all_questionnaires():
     questionnaires = Questionnaire.query.all()
     return jsonify([questionnaire.serialize() for questionnaire in questionnaires]), 200
