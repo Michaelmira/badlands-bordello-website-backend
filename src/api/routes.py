@@ -1,11 +1,13 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
+import os
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User, Questionnaire
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+
 
 api = Blueprint('api', __name__)
 
@@ -115,3 +117,19 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+@api.route('/create-user', methods=['POST'])
+def create_user():
+    email = request.json.get("email", None)
+    password = request.json.get("password", None)
+    admin_passkey = request.json.get("admin_passkey", None)
+    if email is None or password is None:
+        return jsonify({"msg": "No email or password"}), 400
+    if admin_passkey != os.getenv("SECRET_ADMIN_PASS"):
+        return jsonify({"msg": "Access Denied"})
+    user = User(email=email, password=password)
+    db.session.add(user)
+    db.session.commit()
+    db.session.refresh(user)
+    response_body = {"msg": "New Admin User Created"}
+    return jsonify(response_body), 201
