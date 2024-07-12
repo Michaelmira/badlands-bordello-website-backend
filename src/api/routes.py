@@ -15,6 +15,7 @@ api = Blueprint('api', __name__)
 CORS(api)
 
 @api.route('/questionnaires', methods=['GET'])
+@jwt_required()
 def all_questionnaires():
     questionnaires = Questionnaire.query.all()
     return jsonify([questionnaire.serialize() for questionnaire in questionnaires]), 200
@@ -72,7 +73,7 @@ def edit_questionnaire(questionnaire_id):
     return jsonify({"questionnaire": questionnaire.serialize()}), 200
 
 @api.route('/questionnaire/delete/<int:questionnaire_id>', methods=['DELETE'])
-@jwt_required()
+# @jwt_required()
 def delete_questionnaire(questionnaire_id):
     questionnaire = Questionnaire.query.get(questionnaire_id)
 
@@ -102,11 +103,9 @@ def handle_logins():
     return jsonify(access_token=access_token), 201
 
 @api.route('/private', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def handle_private_data():
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
-    message = f"of these are all my recent secrets, I use {user.email} and have a {user.id}"
+    message = "Access Granted"
     return jsonify(message), 200
 
 @api.route('/hello', methods=['POST', 'GET'])
